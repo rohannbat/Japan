@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan · January 2027 — Three Cousins Trip Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Manrope:wght@300..800&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAF6EE;
+  --bg-card: #FFFFFF;
+  --bg-soft: #F2EDE2;
+  --ink: #1A1614;
+  --ink-mid: #5D5852;
+  --ink-soft: #908A82;
+  --indigo: #1B3A5C;
+  --indigo-soft: #4A6B8A;
+  --vermillion: #C5453B;
+  --gold: #B8924F;
+  --line: rgba(26, 22, 20, 0.12);
+  --line-soft: rgba(26, 22, 20, 0.06);
+  --shadow-sm: 0 1px 2px rgba(26, 22, 20, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14110F;
+    --bg-card: #1F1B18;
+    --bg-soft: #1A1714;
+    --ink: #F5EFE3;
+    --ink-mid: #B5AEA4;
+    --ink-soft: #807A72;
+    --indigo: #7DA3D0;
+    --indigo-soft: #5A82AE;
+    --vermillion: #E5705F;
+    --gold: #D4AA66;
+    --line: rgba(245, 239, 227, 0.12);
+    --line-soft: rgba(245, 239, 227, 0.05);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Manrope', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 20% 10%, rgba(197, 69, 59, 0.025) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(27, 58, 92, 0.03) 0%, transparent 50%);
+  min-height: 100vh;
+}
+
+.serif { font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 40; }
+.jp { font-family: 'Noto Serif JP', 'Fraunces', serif; }
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* HERO */
+header.hero {
+  padding: 90px 0 70px;
+  position: relative;
+  border-bottom: 0.5px solid var(--line);
+}
+
+.kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vermillion);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.kicker::before, .kicker::after {
+  content: '';
+  height: 1px;
+  background: var(--vermillion);
+  flex: 0 0 32px;
+  opacity: 0.5;
+}
+
+.kicker::after { flex: 1; opacity: 0.15; }
+
+h1.display {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 80, 'opsz' 144;
+  font-size: clamp(64px, 14vw, 152px);
+  line-height: 0.92;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+h1.display .accent {
+  font-style: italic;
+  font-variation-settings: 'SOFT' 100, 'opsz' 144;
+  color: var(--vermillion);
+}
+
+.subtitle-jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: clamp(20px, 3vw, 28px);
+  color: var(--indigo);
+  letter-spacing: 0.4em;
+  margin-bottom: 30px;
+  font-weight: 400;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--ink-mid);
+  max-width: 520px;
+  margin-bottom: 50px;
+  line-height: 1.55;
+}
+
+.countdown-block {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 18px 28px;
+  background: var(--bg-card);
+  border: 0.5px solid var(--line);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.countdown-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.countdown-value {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 60, 'opsz' 144;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.countdown-unit {
+  font-size: 13px;
+  color: var(--ink-mid);
+  font-weight: 500;
+}
+
+/* STATS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 60px 0;
+  border-top: 0.5px solid var(--line);
+  border-bottom: 0.5px solid var(--line);
+}
+
+.stat {
+  padding: 28px 24px;
+  border-right: 0.5px solid var(--line);
+}
+
+.stat:last-child { border-right: none; }
+
+.stat-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 40;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: var(--ink-mid);
+  margin-top: 6px;
+}
+
+/* SECTIONS */
+section {
+  padding: 70px 0;
+  border-bottom: 0.5px solid var(--line);
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.section-number {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-variation-settings: 'SOFT' 80;
+  font-size: 22px;
+  color: var(--vermillion);
+  font-weight: 400;
+}
+
+h2.section-title {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 50, 'opsz' 144;
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.section-meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* CHECKLIST */
+.progress-bar {
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--vermillion), var(--gold));
+  transition: width 0.5s ease;
+  width: 0;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: var(--ink-mid);
+  margin-bottom: 30px;
+}
+
+.progress-text .num {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 0.5px solid var(--line-soft);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.check-item:last-child { border-bottom: none; }
+
+.check-item:hover .checkbox {
+  border-color: var(--vermillion);
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 4px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-top: 2px;
+  position: relative;
+}
+
+.checkbox::after {
+  content: '';
+  width: 12px;
+  height: 6px;
+  border-left: 2px solid var(--bg-card);
+  border-bottom: 2px solid var(--bg-card);
+  transform: rotate(-45deg) translate(2px, -2px) scale(0);
+  transition: transform 0.2s;
+}
+
+.check-item.done .checkbox {
+  background: var(--indigo);
+  border-color: var(--indigo);
+}
+
+.check-item.done .checkbox::after { transform: rotate(-45deg) translate(2px, -2px) scale(1); }
+
+.check-item.done .check-title { 
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-soft);
+}
+
+.check-body { flex: 1; }
+
+.check-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 2px;
+  transition: all 0.2s;
+}
+
+.check-desc {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
+.check-when {
+  font-size: 11px;
+  color: var(--vermillion);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ITINERARY */
+.itin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.day {
+  background: var(--bg-card);
+  border: 0.5px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.day:hover { border-color: var(--ink-soft); }
+
+.day-header {
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.day-header:hover {
+  background: var(--bg-soft);
+}
+
+.day-num-block {
+  flex-shrink: 0;
+  text-align: center;
+  min-width: 64px;
+}
+
+.day-num-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.day-num-val {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 60;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--vermillion);
+  line-height: 1;
+  margin: 2px 0;
+}
+
+.day-date {
+  font-size: 11px;
+  color: var(--ink-mid);
+}
+
+.day-divider {
+  width: 0.5px;
+  height: 50px;
+  background: var(--line);
+  flex-shrink: 0;
+}
+
+.day-info { flex: 1; min-width: 0; }
+
+.day-title {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 30;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.day-loc {
+  font-size: 13px;
+  color: var(--ink-mid);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-loc::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--vermillion);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.day-arrow {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  color: var(--ink-soft);
+}
+
+.day.open .day-arrow { transform: rotate(180deg); }
+
+.day-arrow svg { width: 14px; height: 14px; }
+
+.day-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.day.open .day-body { max-height: 800px; }
+
+.day-content {
+  padding: 0 26px 26px 26px;
+  border-top: 0.5px solid var(--line-soft);
+  padding-top: 22px;
+}
+
+.day-narrative {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.day-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day-tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--bg-soft);
+  color: var(--ink-mid);
+  border: 0.5px solid var(--line);
+}
+
+/* BUDGET */
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.budget-card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--line);
+  border-radius: 6px;
+  padding: 18px 20px;
+}
+
+.budget-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.budget-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--ink-mid);
+  padding: 4px 0;
+}
+
+.budget-row .val {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.budget-input {
+  width: 90px;
+  padding: 4px 8px;
+  border: 0.5px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: right;
+}
+
+.budget-input:focus {
+  outline: none;
+  border-color: var(--indigo);
+}
+
+.budget-total {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 24px 28px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.budget-total-label {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.budget-total-val {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: 'SOFT' 50;
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.budget-total-sub {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+/* NOTES */
+.notes-area {
+  width: 100%;
+  min-height: 180px;
+  padding: 20px 22px;
+  background: var(--bg-card);
+  border: 0.5px solid var(--line);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.notes-area:focus {
+  outline: none;
+  border-color: var(--indigo);
+}
+
+.notes-area::placeholder {
+  color: var(--ink-soft);
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+}
+
+.save-indicator {
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.save-indicator.show { opacity: 1; }
+
+/* FOOTER */
+footer {
+  padding: 60px 0;
+  text-align: center;
+  border-top: 0.5px solid var(--line);
+  margin-top: 40px;
+}
+
+.footer-mark {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 24px;
+  color: var(--vermillion);
+  margin-bottom: 14px;
+  letter-spacing: 0.3em;
+}
+
+.footer-text {
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.footer-quote {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-variation-settings: 'SOFT' 80;
+  font-size: 17px;
+  color: var(--ink-mid);
+  max-width: 480px;
+  margin: 24px auto 0;
+  line-height: 1.6;
+}
+
+/* SUGGESTIONS */
+.suggest-form-box{background:var(--bg-card);border:0.5px solid var(--line);border-radius:6px;padding:24px;margin-bottom:32px}
+.suggest-form-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.suggest-input,.suggest-select,.suggest-area{width:100%;padding:11px 14px;border:0.5px solid var(--line);border-radius:4px;background:var(--bg);font-family:inherit;font-size:14px;color:var(--ink);transition:border-color 0.2s;-webkit-appearance:none}
+.suggest-input:focus,.suggest-select:focus,.suggest-area:focus{outline:none;border-color:var(--indigo)}
+.suggest-input{flex:0 0 180px;width:180px}
+.suggest-select{flex:1;cursor:pointer;min-width:160px}
+.suggest-area{resize:vertical;min-height:90px;margin-bottom:14px;line-height:1.6}
+.suggest-btn{padding:11px 22px;background:var(--ink);color:var(--bg);border:none;border-radius:4px;font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:opacity .15s}
+.suggest-btn:hover{opacity:.8}
+.suggest-btn:disabled{opacity:.4;cursor:default}
+.suggest-copy-confirm{font-size:12px;color:var(--indigo);min-height:18px;letter-spacing:.04em;line-height:1.5;margin-top:10px}
+.sq-section-title{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
+.sq-item{background:var(--bg-card);border:0.5px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:10px;transition:border-color .2s}
+.sq-item.approved{border-color:rgba(27,58,92,.25);background:var(--bg-soft)}
+.sq-item.rejected{opacity:.4}
+.sq-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.sq-from{font-weight:600;font-size:14px;color:var(--ink)}
+.sq-day-badge{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--bg-soft);border:0.5px solid var(--line);color:var(--ink-mid)}
+.sq-status-badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;margin-left:auto}
+.sq-status-badge.pending{background:rgba(184,146,79,.12);color:var(--gold);border:0.5px solid rgba(184,146,79,.4)}
+.sq-status-badge.approved{background:rgba(27,58,92,.1);color:var(--indigo);border:0.5px solid rgba(27,58,92,.3)}
+.sq-status-badge.rejected{background:var(--bg-soft);color:var(--ink-soft);border:0.5px solid var(--line)}
+.sq-text{font-size:14px;color:var(--ink-mid);line-height:1.65;margin-bottom:14px}
+.sq-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sq-approve{padding:7px 16px;background:var(--indigo);color:#fff;border:none;border-radius:4px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:opacity .15s}
+.sq-approve:hover{opacity:.8}
+.sq-reject{padding:7px 13px;background:transparent;color:var(--ink-soft);border:0.5px solid var(--line);border-radius:4px;font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s}
+.sq-reject:hover{border-color:var(--vermillion);color:var(--vermillion)}
+.sq-time{font-size:11px;color:var(--ink-soft);margin-left:auto;letter-spacing:.04em}
+.no-suggestions{font-size:14px;color:var(--ink-soft);font-style:italic;font-family:'Fraunces',serif;padding:16px 0;line-height:1.7}
+.new-suggestion-banner{background:var(--bg-soft);border:0.5px solid var(--indigo);border-left:3px solid var(--indigo);border-radius:4px;padding:13px 16px;margin-bottom:24px;font-size:14px;color:var(--ink-mid);line-height:1.55}
+.new-suggestion-banner strong{color:var(--ink)}
+.day-approved-changes{margin-top:16px;padding:11px 14px;background:rgba(27,58,92,.06);border-left:2.5px solid var(--indigo);border-radius:0 4px 4px 0;font-size:13px;color:var(--ink-mid);line-height:1.65}
+.dac-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+.dac-item{margin-bottom:5px}
+.dac-item:last-child{margin-bottom:0}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeUp 0.8s ease backwards;
+}
+
+header.hero > * { animation: fadeUp 0.8s ease backwards; }
+header.hero .kicker { animation-delay: 0.05s; }
+header.hero h1 { animation-delay: 0.15s; }
+header.hero .subtitle-jp { animation-delay: 0.3s; }
+header.hero .subtitle { animation-delay: 0.4s; }
+header.hero .countdown-block { animation-delay: 0.5s; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  main { padding: 0 20px; }
+  header.hero { padding: 60px 0 50px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat { border-right: 0.5px solid var(--line); border-bottom: 0.5px solid var(--line); }
+  .stat:nth-child(2n) { border-right: none; }
+  .stat:nth-child(3), .stat:nth-child(4) { border-bottom: none; }
+  section { padding: 50px 0; }
+  .day-header { gap: 16px; padding: 18px 20px; }
+  .day-num-block { min-width: 50px; }
+  .day-num-val { font-size: 24px; }
+  .day-content { padding: 22px 20px; }
+  .day-divider { display: none; }
+  .countdown-block { padding: 14px 20px; gap: 14px; flex-wrap: wrap; }
+  .countdown-value { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<main>
+
+<header class="hero">
+  <div class="kicker">23 Jan — 6 Feb · 2027</div>
+  <h1 class="display">Japan, <span class="accent">eventually.</span></h1>
+  <div class="subtitle-jp">日本へ</div>
+  <p class="subtitle">Three cousins. Fourteen days. An ambitious wishlist of rabbits, cats, ski powder, sake, and snow sculptures.</p>
+  <div class="countdown-block">
+    <div>
+      <div class="countdown-label">Departure</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px">
+        <span class="countdown-value" id="countdown-days">—</span>
+        <span class="countdown-unit">days away</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="stats-grid">
+  <div class="stat">
+    <div class="stat-label">Duration</div>
+    <div class="stat-value">14</div>
+    <div class="stat-sub">days, 13 nights</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Cities</div>
+    <div class="stat-value">6</div>
+    <div class="stat-sub">Osaka → Sapporo</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Group</div>
+    <div class="stat-value">3</div>
+    <div class="stat-sub">cousins</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Budget</div>
+    <div class="stat-value">$6.2k</div>
+    <div class="stat-sub">per person, all in</div>
+  </div>
+</div>
+
+<section id="checklist-section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">i.</div>
+      <h2 class="section-title">Before we fly</h2>
+    </div>
+    <div class="section-meta">14 things · in order</div>
+  </div>
+  
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="progress-text"><span class="num" id="progress-num">0</span> of 14 complete</div>
+  
+  <div class="check-list" id="checklist-list"></div>
+</section>
+
+<section id="itinerary-section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">ii.</div>
+      <h2 class="section-title">The route</h2>
+    </div>
+    <div class="section-meta">Tap any day to expand</div>
+  </div>
+  
+  <div class="itin-list" id="itinerary-list"></div>
+</section>
+
+<section id="budget">
+  <div class="section-head">
+    <div>
+      <div class="section-number">iii.</div>
+      <h2 class="section-title">The damage</h2>
+    </div>
+    <div class="section-meta">Track as you book</div>
+  </div>
+  
+  <div class="budget-grid" id="budget-grid"></div>
+  
+  <div class="budget-total">
+    <div>
+      <div class="budget-total-label">Total spent so far</div>
+      <div class="budget-total-val" id="budget-total">AUD 0</div>
+    </div>
+    <div style="text-align:right">
+      <div class="budget-total-label">Target</div>
+      <div class="budget-total-val" style="opacity:0.5">AUD 6,200</div>
+      <div class="budget-total-sub" id="budget-remaining">AUD 6,200 remaining</div>
+    </div>
+  </div>
+</section>
+
+<section id="notes-section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">iv.</div>
+      <h2 class="section-title">Loose ends</h2>
+    </div>
+    <div class="section-meta">Auto-saves</div>
+  </div>
+  
+  <textarea class="notes-area" id="notes" placeholder="Restaurant recommendations from Reddit, that one ramen place Mike mentioned, what to pack for Niseko, songs for the karaoke night, anything else..."></textarea>
+  <div class="save-indicator" id="save-indicator">Saved</div>
+</section>
+
+<section id="suggestions-section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">v.</div>
+      <h2 class="section-title">Suggest a change</h2>
+    </div>
+    <div class="section-meta">Pending your approval</div>
+  </div>
+
+  <div id="new-suggestion-banner" class="new-suggestion-banner" style="display:none"></div>
+
+  <div class="suggest-form-box">
+    <p style="font-size:13px;color:var(--ink-mid);margin-bottom:18px;line-height:1.6">Fill this in, hit submit, and a link gets copied to your clipboard. Send that link to the trip organiser — when they open it, your suggestion lands in the approval queue below.</p>
+    <div class="suggest-form-row">
+      <input type="text" id="suggest-from" class="suggest-input" placeholder="Your name" maxlength="40">
+      <select id="suggest-day" class="suggest-select"></select>
+    </div>
+    <textarea id="suggest-text" class="suggest-area" placeholder="What would you like to add or change? Be specific — the more detail the easier to act on..."></textarea>
+    <button class="suggest-btn" id="suggest-submit-btn" onclick="submitSuggestion()">Submit &amp; copy link</button>
+    <div class="suggest-copy-confirm" id="suggest-copy-confirm"></div>
+  </div>
+
+  <div id="suggestion-queue"></div>
+</section>
+
+<footer>
+  <div class="footer-mark">日 本</div>
+  <div class="footer-text">January MMXXVII</div>
+  <p class="footer-quote">"The journey of a thousand miles begins with one step." — and three refundable plane tickets.</p>
+</footer>
+
+</main>
+
+<script>
+const CHECKLIST = [
+  { title: "Check all 3 passports", desc: "Must be valid until at least Aug 2027. Renewals take 6+ weeks in Australia.", when: "Now" },
+  { title: "Apply for Japan visa", desc: "Submit to Consulate-General of Japan in Melbourne. Allow 4-6 weeks buffer.", when: "Jul 2026" },
+  { title: "Book flights with CFAR", desc: "Cathay Pacific or Singapore Airlines open jaw (MEL→KIX / NRT→MEL) via Booking.com + Cancel For Any Reason add-on.", when: "Jun 2026" },
+  { title: "Book Sapporo→Tokyo domestic", desc: "Feb 5 evening flight. JAL or ANA, ~AUD 100-150 per person.", when: "Jun 2026" },
+  { title: "Book Niseko accommodation + lift passes", desc: "Sells out first. Grand Hirafu area, 1 night peak season. Pre-book gear hire too.", when: "Jun 2026" },
+  { title: "Book Sapporo Snow Festival week hotels", desc: "Premium pricing during festival - book central to Odori Park.", when: "Jul 2026" },
+  { title: "Book remaining accommodation", desc: "Osaka (3 nights), Hiroshima (1), Tokyo (4 + 1), Sendai (1). All on free cancellation rates.", when: "Aug 2026" },
+  { title: "Buy travel insurance", desc: "Standard policy covering medical, theft, cancellation. Make sure your visa applicant has visa-denial cover.", when: "Aug 2026" },
+  { title: "Book JR East-South Hokkaido Pass", desc: "6-day regional pass. ¥35,000 per person. Buy via Klook or JR East site before departure.", when: "Nov 2026" },
+  { title: "Pre-book Cat Island ferry", desc: "Miyako Steamship Co. — limited winter sailings. Reserve in advance.", when: "Nov 2026" },
+  { title: "Pack snow gear", desc: "Niseko = serious cold (-10°C+). Thermals, ski socks, gloves, beanies. Skis hired on arrival.", when: "Jan 2027" },
+  { title: "Download offline maps + apps", desc: "Google Maps offline for Tokyo/Osaka/Sapporo. Japan Travel by Navitime. Google Translate JP pack.", when: "Jan 2027" },
+  { title: "Get cash + IC card backup plan", desc: "Many small places still cash-only. Withdraw at 7-Eleven ATMs (foreign card friendly).", when: "Jan 2027" },
+  { title: "Final itinerary print-out for visa-holder", desc: "Carry printed itinerary, accommodation confirmations, return tickets at immigration.", when: "Jan 2027" }
+];
+
+const ITINERARY = [
+  { num: 1, date: "Sat 24 Jan", title: "Arrive in Osaka", loc: "Kansai Airport → Osaka", body: "Haruka Express from KIX to central Osaka (75 min). Drop bags, head straight to Dotonbori for takoyaki, okonomiyaki, and recovery beers. Don't be ambitious — you just flew 10 hours.", tags: ["Haruka Express", "Dotonbori"] },
+  { num: 2, date: "Sun 25 Jan", title: "Osaka day one", loc: "Castle, Shinsekai, Kuromon", body: "Osaka Castle morning. Shinsekai afternoon for cheap kushikatsu and Tsutenkaku Tower. Evening: Kuromon Market then another Dotonbori lap. January weekday = almost no queues.", tags: ["Osaka Castle", "Shinsekai", "Kuromon Market"] },
+  { num: 3, date: "Mon 26 Jan", title: "Choice day", loc: "Nara, USJ, or Kyoto", body: "Vote: Nara deer (45 min by train), Universal Studios Japan with Nintendo World, or a half-day Fushimi Inari run in Kyoto (15 min by shinkansen). Whatever wins, big night out in Shinsaibashi.", tags: ["Nara", "Universal Studios", "Kyoto"] },
+  { num: 4, date: "Tue 27 Jan", title: "Rabbit Island", loc: "Okunoshima → Hiroshima", body: "Shinkansen west to Mihara, local to Tadanoumi, short ferry to Okunoshima. Buy pellets on the mainland — the rabbits will mob you. 2-3 hours on the island, then shinkansen to Hiroshima for the night.", tags: ["Rabbit Island", "Sanyo Shinkansen", "Buy pellets!"] },
+  { num: 5, date: "Wed 28 Jan", title: "Hiroshima + bullet train", loc: "Peace Memorial → Tokyo", body: "Peace Memorial Museum morning (allow 2 hours). Quick ferry to Miyajima for the floating torii gate. Afternoon: Hikari shinkansen to Tokyo (~4.5 hrs). Arrive evening, settle into Tokyo hotel.", tags: ["Peace Memorial", "Miyajima", "Hikari shinkansen"] },
+  { num: 6, date: "Thu 29 Jan", title: "Tokyo unleashed", loc: "Shibuya · Akihabara · Shinjuku", body: "Shibuya scramble + Hachiko morning. Akihabara afternoon for arcades and electronics. Evening: Shinjuku Golden Gai for proper local bar-hopping. Hit nomihodai at an izakaya for budget unlimited drinks.", tags: ["Shibuya Scramble", "Akihabara", "Golden Gai"] },
+  { num: 7, date: "Fri 30 Jan", title: "Crayon Shin-chan day", loc: "Kasukabe", body: "35-min train to Kasukabe. Themed manhole covers, statues at the station, character shops. Half-day trip. Back to Tokyo for a big club night — Womb in Shibuya or somewhere in Roppongi.", tags: ["Kasukabe", "Shin-chan", "Tobu line (not JR)"] },
+  { num: 8, date: "Sat 31 Jan", title: "Mt Fuji", loc: "Kawaguchiko", body: "Highway bus from Shinjuku to Kawaguchiko (~2 hrs, ~¥1,800). Clear January day = Fuji on full display. Hike to Chureito Pagoda for the postcard shot. Hoto noodles for lunch. Back to Tokyo evening.", tags: ["Mt Fuji", "Chureito Pagoda", "Bus from Shinjuku"] },
+  { num: 9, date: "Sun 1 Feb", title: "Cat Island", loc: "Tashirojima → Sendai", body: "Early start. Shinkansen Tokyo→Sendai (90 min), local to Ishinomaki, ferry to Tashirojima (50 min). ~100 cats, ~50 residents. Stay 3-4 hours. Evening: gyutan (beef tongue) dinner in Sendai. Overnight Sendai.", tags: ["Cat Island", "Ferry from Ishinomaki", "Overnight Sendai"] },
+  { num: 10, date: "Mon 2 Feb", title: "North to Sapporo", loc: "Hokkaido Shinkansen", body: "Long train day. Hokkaido Shinkansen to Shin-Hakodate-Hokuto, transfer to limited express for Sapporo (~7 hours total). Arrive afternoon. Settle in, miso ramen at Sapporo Ramen Yokocho. Snow Festival construction visible in Odori Park.", tags: ["Hokkaido Shinkansen", "Sapporo Ramen Yokocho"] },
+  { num: 11, date: "Tue 3 Feb", title: "Niseko — ski day", loc: "Grand Hirafu", body: "Highway bus from Sapporo to Niseko (~2.5 hrs). Niseko United links 4 resorts on one pass. Peak powder season. End with onsen in resort village — non-negotiable. Overnight in Niseko or back to Sapporo.", tags: ["Niseko", "Grand Hirafu", "Onsen après-ski"] },
+  { num: 12, date: "Wed 4 Feb", title: "Snow Festival opens", loc: "Niseko → Sapporo", body: "Optional second ski morning, or head back to Sapporo. Snow Festival opens today at Odori Park — go in the evening for the lit-up snow sculptures. Susukino site for ice carvings + drinking.", tags: ["Snow Festival opens", "Odori Park", "Susukino"] },
+  { num: 13, date: "Thu 5 Feb", title: "Festival + fly south", loc: "Sapporo → Tokyo", body: "Full day at Snow Festival. Odori sculptures, Susukino ice carvings (better at night when lit). Evening: domestic flight CTS→NRT (~90 min) for the international connection tomorrow. One last night in Tokyo.", tags: ["Snow Festival", "CTS → NRT flight"] },
+  { num: 14, date: "Fri 6 Feb", title: "Home time", loc: "Tokyo → Melbourne", body: "Quick Tsukiji Outer Market breakfast if NRT departure allows. Otherwise straight to Narita. ~10 hour flight + date line = arrive Melbourne 7 Feb. Trip complete.", tags: ["Tsukiji breakfast", "NRT → MEL"] }
+];
+
+const BUDGET = [
+  { key: "flights", label: "Flights", target: 2100, sub: "Open jaw + CFAR + domestic" },
+  { key: "transport", label: "Transport in Japan", target: 730, sub: "Individual tickets + IC card + regional pass" },
+  { key: "accommodation", label: "Accommodation", target: 1100, sub: "13 nights, room split 3 ways" },
+  { key: "niseko", label: "Niseko skiing", target: 380, sub: "Lift + gear + bus" },
+  { key: "food", label: "Food", target: 630, sub: "14 days" },
+  { key: "nightlife", label: "Nightlife", target: 620, sub: "6-7 nights out" },
+  { key: "extras", label: "Extras + visa", target: 460, sub: "Attractions, shopping, visa" },
+  { key: "buffer", label: "Buffer", target: 180, sub: "Things you didn't plan for" }
+];
+
+function load(key, fallback) {
+  try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); }
+  catch(e) { return fallback; }
+}
+
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+  catch(e) { return false; }
+}
+
+function updateCountdown() {
+  const departure = new Date('2027-01-23T18:00:00+10:00');
+  const now = new Date();
+  const diff = departure - now;
+  if (diff <= 0) { document.getElementById('countdown-days').textContent = "Now"; return; }
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  document.getElementById('countdown-days').textContent = days.toLocaleString();
+}
+
+function renderChecklist() {
+  const checked = load('checklist', {});
+  const container = document.getElementById('checklist-list');
+  container.innerHTML = '';
+  CHECKLIST.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'check-item' + (checked[i] ? ' done' : '');
+    div.innerHTML = `
+      <div class="checkbox"></div>
+      <div class="check-body">
+        <div class="check-title">${item.title}</div>
+        <div class="check-desc">${item.desc}</div>
+        <div class="check-when">${item.when}</div>
+      </div>
+    `;
+    div.addEventListener('click', () => {
+      checked[i] = !checked[i];
+      save('checklist', checked);
+      renderChecklist();
+    });
+    container.appendChild(div);
+  });
+  const doneCount = Object.values(checked).filter(Boolean).length;
+  document.getElementById('progress-fill').style.width = (doneCount / CHECKLIST.length * 100) + '%';
+  document.getElementById('progress-num').textContent = doneCount;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderItinerary() {
+  const stored = load('itin-open', null);
+  const opened = stored === null ? {0: true} : stored;
+  const container = document.getElementById('itinerary-list');
+  container.innerHTML = '';
+  ITINERARY.forEach((day, i) => {
+    const approvedForDay = suggestionsData.filter(s => s.status === 'approved' && String(s.day) === String(day.num));
+    const approvedHtml = approvedForDay.length > 0 ? `
+      <div class="day-approved-changes">
+        <div class="dac-label">Approved changes</div>
+        ${approvedForDay.map(s => `<div class="dac-item"><strong style="color:var(--ink)">${escHtml(s.from)}:</strong> ${escHtml(s.text)}</div>`).join('')}
+      </div>` : '';
+    const div = document.createElement('div');
+    div.className = 'day' + (opened[i] ? ' open' : '');
+    div.innerHTML = `
+      <div class="day-header">
+        <div class="day-num-block">
+          <div class="day-num-label">Day</div>
+          <div class="day-num-val">${day.num}</div>
+          <div class="day-date">${day.date}</div>
+        </div>
+        <div class="day-divider"></div>
+        <div class="day-info">
+          <div class="day-title">${day.title}${approvedForDay.length ? ' <span style="font-size:11px;font-family:Manrope,sans-serif;font-weight:600;color:var(--indigo);letter-spacing:.05em;vertical-align:middle">· ' + approvedForDay.length + ' change' + (approvedForDay.length>1?'s':'') + '</span>' : ''}</div>
+          <div class="day-loc">${day.loc}</div>
+        </div>
+        <div class="day-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="day-body">
+        <div class="day-content">
+          <div class="day-narrative">${day.body}</div>
+          <div class="day-tags">${day.tags.map(t => `<span class="day-tag">${t}</span>`).join('')}</div>
+          ${approvedHtml}
+        </div>
+      </div>
+    `;
+    div.querySelector('.day-header').addEventListener('click', () => {
+      opened[i] = !opened[i];
+      save('itin-open', opened);
+      div.classList.toggle('open');
+    });
+    container.appendChild(div);
+  });
+}
+
+function renderBudget() {
+  const spent = load('budget', {});
+  const container = document.getElementById('budget-grid');
+  container.innerHTML = '';
+  let totalSpent = 0;
+  BUDGET.forEach(cat => {
+    const actual = spent[cat.key] || 0;
+    totalSpent += actual;
+    const div = document.createElement('div');
+    div.className = 'budget-card';
+    div.innerHTML = `
+      <div class="budget-label">${cat.label}</div>
+      <div class="budget-row">
+        <span>Target</span>
+        <span class="val">AUD ${cat.target.toLocaleString()}</span>
+      </div>
+      <div class="budget-row">
+        <span>Actual</span>
+        <input type="number" class="budget-input" value="${actual || ''}" placeholder="0" data-key="${cat.key}">
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);margin-top:8px;line-height:1.4">${cat.sub}</div>
+    `;
+    container.appendChild(div);
+  });
+  container.querySelectorAll('.budget-input').forEach(input => {
+    input.addEventListener('input', e => {
+      const key = e.target.dataset.key;
+      const val = parseFloat(e.target.value) || 0;
+      spent[key] = val;
+      save('budget', spent);
+      updateBudgetTotal();
+    });
+  });
+  updateBudgetTotal();
+}
+
+function updateBudgetTotal() {
+  const spent = load('budget', {});
+  const total = Object.values(spent).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+  document.getElementById('budget-total').textContent = 'AUD ' + Math.round(total).toLocaleString();
+  const remaining = 6200 - total;
+  const remEl = document.getElementById('budget-remaining');
+  if (remaining >= 0) {
+    remEl.textContent = 'AUD ' + Math.round(remaining).toLocaleString() + ' remaining';
+  } else {
+    remEl.textContent = 'AUD ' + Math.round(Math.abs(remaining)).toLocaleString() + ' over budget';
+  }
+}
+
+function setupNotes() {
+  const notes = document.getElementById('notes');
+  const indicator = document.getElementById('save-indicator');
+  notes.value = load('notes', '');
+  let saveTimer;
+  notes.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      save('notes', notes.value);
+      indicator.classList.add('show');
+      setTimeout(() => indicator.classList.remove('show'), 1500);
+    }, 400);
+  });
+}
+
+// ---- SUGGESTION SYSTEM ----
+let suggestionsData = [];
+
+function loadSuggestionsData() {
+  suggestionsData = load('suggestions', []);
+}
+
+function saveSuggestionsData() {
+  save('suggestions', suggestionsData);
+}
+
+function populateDaySelect() {
+  const select = document.getElementById('suggest-day');
+  select.innerHTML = '<option value="general">General suggestion (no specific day)</option>';
+  ITINERARY.forEach(day => {
+    const opt = document.createElement('option');
+    opt.value = String(day.num);
+    opt.textContent = 'Day ' + day.num + ' — ' + day.title;
+    select.appendChild(opt);
+  });
+}
+
+function renderSuggestions() {
+  const container = document.getElementById('suggestion-queue');
+  if (!container) return;
+  if (suggestionsData.length === 0) {
+    container.innerHTML = '<p class="no-suggestions">No suggestions yet. Share the page with your cousins and tell them to scroll down to this section.</p>';
+    return;
+  }
+  const pending = suggestionsData.filter(s => s.status === 'pending');
+  const decided = suggestionsData.filter(s => s.status !== 'pending');
+  container.innerHTML = '';
+  if (pending.length > 0) {
+    const lbl = document.createElement('div');
+    lbl.className = 'sq-section-title';
+    lbl.textContent = 'Waiting for approval · ' + pending.length;
+    container.appendChild(lbl);
+    pending.forEach(s => container.appendChild(buildSuggestionCard(s)));
+  }
+  if (decided.length > 0) {
+    const lbl = document.createElement('div');
+    lbl.className = 'sq-section-title';
+    lbl.style.marginTop = pending.length ? '30px' : '0';
+    lbl.textContent = 'Decided';
+    container.appendChild(lbl);
+    decided.forEach(s => container.appendChild(buildSuggestionCard(s)));
+  }
+}
+
+function buildSuggestionCard(s) {
+  const div = document.createElement('div');
+  div.className = 'sq-item ' + s.status;
+  const dayLabel = s.day === 'general'
+    ? 'General'
+    : (() => { const d = ITINERARY.find(d => String(d.num) === String(s.day)); return d ? 'Day ' + d.num + ' — ' + d.title : 'Day ' + s.day; })();
+  const statusIcon = s.status === 'pending' ? '⏳ Pending' : s.status === 'approved' ? '✓ Approved' : '✕ Rejected';
+  div.innerHTML = `
+    <div class="sq-header">
+      <span class="sq-from">${escHtml(s.from)}</span>
+      <span class="sq-day-badge">${escHtml(dayLabel)}</span>
+      <span class="sq-status-badge ${s.status}">${statusIcon}</span>
+    </div>
+    <div class="sq-text">${escHtml(s.text)}</div>
+    <div class="sq-actions">
+      ${s.status === 'pending' ? `
+        <button class="sq-approve" onclick="approveSuggestion('${s.id}')">Approve &amp; add to itinerary</button>
+        <button class="sq-reject" onclick="rejectSuggestion('${s.id}')">Reject</button>
+      ` : s.status === 'rejected' ? `
+        <button class="sq-approve" style="opacity:.7;font-size:11px;padding:6px 12px" onclick="approveSuggestion('${s.id}')">Undo — approve instead</button>
+      ` : ''}
+      <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
+    </div>
+  `;
+  return div;
+}
+
+function getTimeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  return Math.floor(h / 24) + 'd ago';
+}
+
+function submitSuggestion() {
+  const from = document.getElementById('suggest-from').value.trim();
+  const day = document.getElementById('suggest-day').value;
+  const text = document.getElementById('suggest-text').value.trim();
+  const confirmEl = document.getElementById('suggest-copy-confirm');
+  const btn = document.getElementById('suggest-submit-btn');
+
+  confirmEl.style.color = 'var(--vermillion)';
+  if (!from) { confirmEl.textContent = 'Please add your name so the organiser knows who sent this.'; return; }
+  if (!text) { confirmEl.textContent = 'Please write your suggestion first.'; return; }
+
+  const suggestion = {
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    from, day, text,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  suggestionsData.push(suggestion);
+  saveSuggestionsData();
+
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(suggestion))));
+  const base = window.location.href.split('?')[0].split('#')[0];
+  const link = base + '?s=' + encoded;
+
+  btn.disabled = true;
+  navigator.clipboard.writeText(link).then(() => {
+    confirmEl.style.color = 'var(--indigo)';
+    confirmEl.textContent = '✓ Link copied! Paste it to the group chat — when the organiser opens it your suggestion appears in their queue.';
+  }).catch(() => {
+    confirmEl.style.color = 'var(--indigo)';
+    confirmEl.innerHTML = '✓ Saved. Manually copy this link and send it:<br><span style="font-size:11px;word-break:break-all;opacity:.7">' + escHtml(link) + '</span>';
+  });
+
+  renderSuggestions();
+  setTimeout(() => {
+    btn.disabled = false;
+    document.getElementById('suggest-from').value = '';
+    document.getElementById('suggest-text').value = '';
+    document.getElementById('suggest-day').value = 'general';
+  }, 4000);
+}
+
+function approveSuggestion(id) {
+  const s = suggestionsData.find(s => s.id === id);
+  if (!s) return;
+  s.status = 'approved';
+  s.decidedAt = new Date().toISOString();
+  saveSuggestionsData();
+  renderSuggestions();
+  renderItinerary();
+}
+
+function rejectSuggestion(id) {
+  const s = suggestionsData.find(s => s.id === id);
+  if (!s) return;
+  s.status = 'rejected';
+  s.decidedAt = new Date().toISOString();
+  saveSuggestionsData();
+  renderSuggestions();
+  renderItinerary();
+}
+
+function checkUrlForSuggestions() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('s');
+  if (!encoded) return;
+  try {
+    const suggestion = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    const banner = document.getElementById('new-suggestion-banner');
+    if (!suggestionsData.find(s => s.id === suggestion.id)) {
+      suggestion.status = 'pending';
+      if (!suggestion.createdAt) suggestion.createdAt = new Date().toISOString();
+      suggestionsData.push(suggestion);
+      saveSuggestionsData();
+      banner.style.display = 'block';
+      banner.innerHTML = '<strong>New suggestion from ' + escHtml(suggestion.from) + ' just arrived!</strong> Review it in the pending queue below — approve to add it to the itinerary, or reject to dismiss it.';
+    } else {
+      banner.style.display = 'block';
+      banner.innerHTML = 'This suggestion from <strong>' + escHtml(suggestion.from) + '</strong> is already in the queue.';
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => {
+      document.getElementById('suggestions-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 500);
+  } catch(e) {}
+}
+
+updateCountdown();
+setInterval(updateCountdown, 60000);
+loadSuggestionsData();
+renderChecklist();
+populateDaySelect();
+renderItinerary();
+renderBudget();
+renderSuggestions();
+setupNotes();
+checkUrlForSuggestions();
+</script>
+
+</body>
+</html>
