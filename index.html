@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Manrope:wght@300..800&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg: #FAF6EE;
@@ -865,13 +866,13 @@ header.hero .countdown-block { animation-delay: 0.5s; }
   <div id="new-suggestion-banner" class="new-suggestion-banner" style="display:none"></div>
 
   <div class="suggest-form-box">
-    <p style="font-size:13px;color:var(--ink-mid);margin-bottom:18px;line-height:1.6">Fill this in, hit submit, and a link gets copied to your clipboard. Send that link to the trip organiser — when they open it, your suggestion lands in the approval queue below.</p>
+    <p style="font-size:13px;color:var(--ink-mid);margin-bottom:18px;line-height:1.6">Fill this in and hit submit. Your suggestion goes live instantly — everyone on the trip will see it in their queue in real time.</p>
     <div class="suggest-form-row">
       <input type="text" id="suggest-from" class="suggest-input" placeholder="Your name" maxlength="40">
       <select id="suggest-day" class="suggest-select"></select>
     </div>
     <textarea id="suggest-text" class="suggest-area" placeholder="What would you like to add or change? Be specific — the more detail the easier to act on..."></textarea>
-    <button class="suggest-btn" id="suggest-submit-btn" onclick="submitSuggestion()">Submit &amp; copy link</button>
+    <button class="suggest-btn" id="suggest-submit-btn" onclick="submitSuggestion()">Submit suggestion</button>
     <div class="suggest-copy-confirm" id="suggest-copy-confirm"></div>
   </div>
 
@@ -887,6 +888,60 @@ header.hero .countdown-block { animation-delay: 0.5s; }
 </main>
 
 <script>
+// ---- SUPABASE ----
+const SUPABASE_URL = 'https://zmlqeanncywtqpcckvqq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_aH202n0rv2rHa9vHLfwDlw_iK4qFawp';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ---- IN-MEMORY CACHE (replaces localStorage) ----
+let _state = { checklist: {}, budget: {}, notes: '', 'itin-open': null };
+let suggestionsData = [];
+
+function load(key, fallback) {
+  const v = _state[key];
+  return (v !== undefined && v !== null) ? v : fallback;
+}
+
+async function save(key, val) {
+  _state[key] = val;
+  try {
+    await db.from('trip_state').upsert({ key, value: val, updated_at: new Date().toISOString() });
+  } catch(e) {}
+  return true;
+}
+
+async function loadAllState() {
+  const { data: rows } = await db.from('trip_state').select('*');
+  if (rows) rows.forEach(r => { _state[r.key] = r.value; });
+  const { data: sRows } = await db.from('suggestions').select('*').order('created_at', { ascending: true });
+  if (sRows) suggestionsData = sRows.map(dbToSuggestion);
+}
+
+function dbToSuggestion(r) {
+  return { id: r.id, from: r.from_name, day: r.day, text: r.text, status: r.status, createdAt: r.created_at, decidedAt: r.decided_at };
+}
+
+function subscribeToChanges() {
+  db.channel('trip-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'trip_state' }, payload => {
+      if (!payload.new) return;
+      const { key, value } = payload.new;
+      _state[key] = value;
+      if (key === 'checklist') renderChecklist();
+      if (key === 'budget') renderBudget();
+      if (key === 'notes') {
+        const el = document.getElementById('notes');
+        if (el && el !== document.activeElement) el.value = value || '';
+      }
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'suggestions' }, async () => {
+      const { data } = await db.from('suggestions').select('*').order('created_at', { ascending: true });
+      if (data) { suggestionsData = data.map(dbToSuggestion); renderSuggestions(); renderItinerary(); }
+    })
+    .subscribe();
+}
+
+// ---- DATA ----
 const CHECKLIST = [
   { title: "Check all 3 passports", desc: "Must be valid until at least Aug 2027. Renewals take 6+ weeks in Australia.", when: "Now" },
   { title: "Apply for Japan visa", desc: "Submit to Consulate-General of Japan in Melbourne. Allow 4-6 weeks buffer.", when: "Jul 2026" },
@@ -932,15 +987,7 @@ const BUDGET = [
   { key: "buffer", label: "Buffer", target: 180, sub: "Things you didn't plan for" }
 ];
 
-function load(key, fallback) {
-  try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); }
-  catch(e) { return fallback; }
-}
-
-function save(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
-  catch(e) { return false; }
-}
+// load/save now handled by Supabase (defined above)
 
 function updateCountdown() {
   const departure = new Date('2027-01-23T18:00:00+10:00');
@@ -1092,15 +1139,6 @@ function setupNotes() {
 }
 
 // ---- SUGGESTION SYSTEM ----
-let suggestionsData = [];
-
-function loadSuggestionsData() {
-  suggestionsData = load('suggestions', []);
-}
-
-function saveSuggestionsData() {
-  save('suggestions', suggestionsData);
-}
 
 function populateDaySelect() {
   const select = document.getElementById('suggest-day');
@@ -1178,7 +1216,7 @@ function getTimeAgo(iso) {
   return Math.floor(h / 24) + 'd ago';
 }
 
-function submitSuggestion() {
+async function submitSuggestion() {
   const from = document.getElementById('suggest-from').value.trim();
   const day = document.getElementById('suggest-day').value;
   const text = document.getElementById('suggest-text').value.trim();
@@ -1189,93 +1227,72 @@ function submitSuggestion() {
   if (!from) { confirmEl.textContent = 'Please add your name so the organiser knows who sent this.'; return; }
   if (!text) { confirmEl.textContent = 'Please write your suggestion first.'; return; }
 
-  const suggestion = {
-    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-    from, day, text,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-
-  suggestionsData.push(suggestion);
-  saveSuggestionsData();
-
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(suggestion))));
-  const base = window.location.href.split('?')[0].split('#')[0];
-  const link = base + '?s=' + encoded;
-
   btn.disabled = true;
-  navigator.clipboard.writeText(link).then(() => {
-    confirmEl.style.color = 'var(--indigo)';
-    confirmEl.textContent = '✓ Link copied! Paste it to the group chat — when the organiser opens it your suggestion appears in their queue.';
-  }).catch(() => {
-    confirmEl.style.color = 'var(--indigo)';
-    confirmEl.innerHTML = '✓ Saved. Manually copy this link and send it:<br><span style="font-size:11px;word-break:break-all;opacity:.7">' + escHtml(link) + '</span>';
+  const { error } = await db.from('suggestions').insert({
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    from_name: from, day, text,
+    status: 'pending',
+    created_at: new Date().toISOString()
   });
 
-  renderSuggestions();
+  if (error) {
+    confirmEl.textContent = 'Something went wrong. Try again.';
+    btn.disabled = false;
+    return;
+  }
+
+  confirmEl.style.color = 'var(--indigo)';
+  confirmEl.textContent = '✓ Submitted! Everyone on the trip will see it instantly.';
   setTimeout(() => {
     btn.disabled = false;
     document.getElementById('suggest-from').value = '';
     document.getElementById('suggest-text').value = '';
     document.getElementById('suggest-day').value = 'general';
-  }, 4000);
+    confirmEl.textContent = '';
+  }, 3000);
 }
 
-function approveSuggestion(id) {
-  const s = suggestionsData.find(s => s.id === id);
-  if (!s) return;
-  s.status = 'approved';
-  s.decidedAt = new Date().toISOString();
-  saveSuggestionsData();
-  renderSuggestions();
-  renderItinerary();
+async function approveSuggestion(id) {
+  await db.from('suggestions').update({ status: 'approved', decided_at: new Date().toISOString() }).eq('id', id);
 }
 
-function rejectSuggestion(id) {
-  const s = suggestionsData.find(s => s.id === id);
-  if (!s) return;
-  s.status = 'rejected';
-  s.decidedAt = new Date().toISOString();
-  saveSuggestionsData();
-  renderSuggestions();
-  renderItinerary();
+async function rejectSuggestion(id) {
+  await db.from('suggestions').update({ status: 'rejected', decided_at: new Date().toISOString() }).eq('id', id);
 }
 
-function checkUrlForSuggestions() {
+async function checkUrlForSuggestions() {
   const params = new URLSearchParams(window.location.search);
   const encoded = params.get('s');
   if (!encoded) return;
   try {
-    const suggestion = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-    const banner = document.getElementById('new-suggestion-banner');
-    if (!suggestionsData.find(s => s.id === suggestion.id)) {
-      suggestion.status = 'pending';
-      if (!suggestion.createdAt) suggestion.createdAt = new Date().toISOString();
-      suggestionsData.push(suggestion);
-      saveSuggestionsData();
-      banner.style.display = 'block';
-      banner.innerHTML = '<strong>New suggestion from ' + escHtml(suggestion.from) + ' just arrived!</strong> Review it in the pending queue below — approve to add it to the itinerary, or reject to dismiss it.';
-    } else {
-      banner.style.display = 'block';
-      banner.innerHTML = 'This suggestion from <strong>' + escHtml(suggestion.from) + '</strong> is already in the queue.';
+    const s = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    const { data: existing } = await db.from('suggestions').select('id').eq('id', s.id).maybeSingle();
+    if (!existing) {
+      await db.from('suggestions').insert({
+        id: s.id, from_name: s.from, day: s.day, text: s.text,
+        status: 'pending', created_at: s.createdAt || new Date().toISOString()
+      });
     }
     window.history.replaceState({}, '', window.location.pathname);
-    setTimeout(() => {
-      document.getElementById('suggestions-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 500);
+    setTimeout(() => document.getElementById('suggestions-section').scrollIntoView({ behavior: 'smooth', block: 'start' }), 500);
   } catch(e) {}
 }
 
 updateCountdown();
 setInterval(updateCountdown, 60000);
-loadSuggestionsData();
-renderChecklist();
-populateDaySelect();
-renderItinerary();
-renderBudget();
-renderSuggestions();
-setupNotes();
-checkUrlForSuggestions();
+
+async function init() {
+  await loadAllState();
+  renderChecklist();
+  populateDaySelect();
+  renderItinerary();
+  renderBudget();
+  renderSuggestions();
+  setupNotes();
+  await checkUrlForSuggestions();
+  subscribeToChanges();
+}
+init();
 </script>
 
 </body>
