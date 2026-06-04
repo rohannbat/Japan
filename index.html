@@ -1212,6 +1212,7 @@ function buildSuggestionCard(s) {
           ${liveItin.map(d => `<option value="${d.num}">Day ${d.num} — ${d.title}</option>`).join('')}
          </select>`
       : '';
+    const errorHtml = s._error ? `<div style="font-size:12px;color:var(--vermillion);margin-top:8px;word-break:break-all">Error: ${escHtml(s._error)}</div>` : '';
     actionsHtml = `
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">
         ${dayPickHtml}
@@ -1219,6 +1220,7 @@ function buildSuggestionCard(s) {
         <button class="sq-reject" onclick="showRejectBox('${s.id}')">Reject</button>
         <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
       </div>
+      ${errorHtml}
       <div id="reject-box-${s.id}" style="display:none;width:100%;margin-top:10px">
         <input class="sq-note-input" id="rnote-${s.id}" placeholder="Reason for rejecting (optional)…">
         <div style="display:flex;gap:8px;margin-top:8px">
@@ -1316,14 +1318,17 @@ async function getAIEdit(id) {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
       body: JSON.stringify({ suggestion: s.text, day })
     });
-    if (!res.ok) throw new Error(`Edge function error: ${res.status}`);
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Edge function ${res.status}: ${body}`);
+    }
     const proposed = await res.json();
     if (proposed.error) throw new Error(proposed.error);
     if (idx !== -1) { suggestionsData[idx] = { ...suggestionsData[idx], status: 'proposed', proposedChanges: proposed }; renderSuggestions(); }
     await db.from('suggestions').update({ status: 'proposed', proposed_changes: proposed }).eq('id', id);
   } catch(e) {
     console.error('AI edit failed:', e);
-    if (idx !== -1) { suggestionsData[idx] = { ...suggestionsData[idx], status: 'pending' }; renderSuggestions(); }
+    if (idx !== -1) { suggestionsData[idx] = { ...suggestionsData[idx], status: 'pending', _error: e.message }; renderSuggestions(); }
     await db.from('suggestions').update({ status: 'pending' }).eq('id', id);
   }
 }
