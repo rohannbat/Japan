@@ -687,15 +687,30 @@ footer {
 .suggest-copy-confirm{font-size:12px;color:var(--indigo);min-height:18px;letter-spacing:.04em;line-height:1.5;margin-top:10px}
 .sq-section-title{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
 .sq-item{background:var(--bg-card);border:0.5px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:10px;transition:border-color .2s}
-.sq-item.approved{border-color:rgba(27,58,92,.25);background:var(--bg-soft)}
-.sq-item.rejected{opacity:.4}
+.sq-item.applied{border-color:rgba(27,58,92,.25);background:var(--bg-soft)}
+.sq-item.rejected{opacity:.5}
+.sq-item.generating{border-color:rgba(184,146,79,.3)}
+.sq-item.proposed{border-color:rgba(27,58,92,.35)}
 .sq-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .sq-from{font-weight:600;font-size:14px;color:var(--ink)}
 .sq-day-badge{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--bg-soft);border:0.5px solid var(--line);color:var(--ink-mid)}
 .sq-status-badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;margin-left:auto}
 .sq-status-badge.pending{background:rgba(184,146,79,.12);color:var(--gold);border:0.5px solid rgba(184,146,79,.4)}
-.sq-status-badge.approved{background:rgba(27,58,92,.1);color:var(--indigo);border:0.5px solid rgba(27,58,92,.3)}
+.sq-status-badge.generating{background:rgba(184,146,79,.12);color:var(--gold);border:0.5px solid rgba(184,146,79,.4)}
+.sq-status-badge.proposed{background:rgba(27,58,92,.1);color:var(--indigo);border:0.5px solid rgba(27,58,92,.3)}
+.sq-status-badge.applied{background:rgba(27,58,92,.1);color:var(--indigo);border:0.5px solid rgba(27,58,92,.3)}
 .sq-status-badge.rejected{background:var(--bg-soft);color:var(--ink-soft);border:0.5px solid var(--line)}
+.sq-diff{margin:14px 0;background:var(--bg-soft);border-radius:4px;padding:14px 16px}
+.diff-field{margin-bottom:14px}.diff-field:last-child{margin-bottom:0}
+.diff-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+.diff-old{font-size:13px;color:var(--ink-soft);line-height:1.6;text-decoration:line-through;margin-bottom:4px}
+.diff-new{font-size:13px;color:var(--ink);line-height:1.6;border-left:2.5px solid var(--indigo);padding-left:10px}
+.diff-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.sq-note-input{width:100%;padding:9px 12px;border:0.5px solid var(--line);border-radius:4px;background:var(--bg);font-family:inherit;font-size:13px;color:var(--ink);margin-top:12px}
+.sq-note-input:focus{outline:none;border-color:var(--indigo)}
+.sq-admin-note{font-size:12px;color:var(--ink-mid);font-style:italic;margin-top:10px;padding:8px 12px;background:var(--bg-soft);border-radius:4px;border-left:2.5px solid var(--indigo-soft)}
+.sq-day-pick{padding:6px 10px;border:0.5px solid var(--line);border-radius:4px;background:var(--bg);font-family:inherit;font-size:12px;color:var(--ink);cursor:pointer}
+.sq-generating{font-size:13px;color:var(--gold);letter-spacing:.04em}
 .sq-text{font-size:14px;color:var(--ink-mid);line-height:1.65;margin-bottom:14px}
 .sq-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sq-approve{padding:7px 16px;background:var(--indigo);color:#fff;border:none;border-radius:4px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:opacity .15s}
@@ -918,7 +933,7 @@ async function loadAllState() {
 }
 
 function dbToSuggestion(r) {
-  return { id: r.id, from: r.from_name, day: r.day, text: r.text, status: r.status, createdAt: r.created_at, decidedAt: r.decided_at };
+  return { id: r.id, from: r.from_name, day: r.day, text: r.text, status: r.status, createdAt: r.created_at, decidedAt: r.decided_at, proposedChanges: r.proposed_changes, adminNote: r.admin_note };
 }
 
 function subscribeToChanges() {
@@ -929,6 +944,7 @@ function subscribeToChanges() {
       _state[key] = value;
       if (key === 'checklist') renderChecklist();
       if (key === 'budget') renderBudget();
+      if (key === 'itinerary') renderItinerary();
       if (key === 'notes') {
         const el = document.getElementById('notes');
         if (el && el !== document.activeElement) el.value = value || '';
@@ -939,6 +955,14 @@ function subscribeToChanges() {
       if (data) { suggestionsData = data.map(dbToSuggestion); renderSuggestions(); renderItinerary(); }
     })
     .subscribe();
+}
+
+function getLiveItinerary() {
+  const overrides = load('itinerary', {});
+  return ITINERARY.map(day => {
+    const o = overrides[String(day.num)];
+    return o ? { ...day, ...o } : day;
+  });
 }
 
 // ---- DATA ----
@@ -1034,12 +1058,13 @@ function renderItinerary() {
   const opened = stored === null ? {0: true} : stored;
   const container = document.getElementById('itinerary-list');
   container.innerHTML = '';
-  ITINERARY.forEach((day, i) => {
-    const approvedForDay = suggestionsData.filter(s => s.status === 'approved' && String(s.day) === String(day.num));
-    const approvedHtml = approvedForDay.length > 0 ? `
+  const liveItin = getLiveItinerary();
+  liveItin.forEach((day, i) => {
+    const appliedForDay = suggestionsData.filter(s => s.status === 'applied' && String(s.day) === String(day.num));
+    const approvedHtml = appliedForDay.length > 0 ? `
       <div class="day-approved-changes">
-        <div class="dac-label">Approved changes</div>
-        ${approvedForDay.map(s => `<div class="dac-item"><strong style="color:var(--ink)">${escHtml(s.from)}:</strong> ${escHtml(s.text)}</div>`).join('')}
+        <div class="dac-label">Edited · ${appliedForDay.length} change${appliedForDay.length>1?'s':''}</div>
+        ${appliedForDay.map(s => `<div class="dac-item"><strong style="color:var(--ink)">${escHtml(s.from)}:</strong> ${escHtml(s.text)}</div>`).join('')}
       </div>` : '';
     const div = document.createElement('div');
     div.className = 'day' + (opened[i] ? ' open' : '');
@@ -1052,7 +1077,7 @@ function renderItinerary() {
         </div>
         <div class="day-divider"></div>
         <div class="day-info">
-          <div class="day-title">${day.title}${approvedForDay.length ? ' <span style="font-size:11px;font-family:Manrope,sans-serif;font-weight:600;color:var(--indigo);letter-spacing:.05em;vertical-align:middle">· ' + approvedForDay.length + ' change' + (approvedForDay.length>1?'s':'') + '</span>' : ''}</div>
+          <div class="day-title">${day.title}${appliedForDay.length ? ' <span style="font-size:11px;font-family:Manrope,sans-serif;font-weight:600;color:var(--indigo);letter-spacing:.05em;vertical-align:middle">· edited</span>' : ''}</div>
           <div class="day-loc">${day.loc}</div>
         </div>
         <div class="day-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
@@ -1158,20 +1183,20 @@ function renderSuggestions() {
     container.innerHTML = '<p class="no-suggestions">No suggestions yet. Share the page with your cousins and tell them to scroll down to this section.</p>';
     return;
   }
-  const pending = suggestionsData.filter(s => s.status === 'pending');
-  const decided = suggestionsData.filter(s => s.status !== 'pending');
+  const active = suggestionsData.filter(s => ['pending','generating','proposed'].includes(s.status));
+  const decided = suggestionsData.filter(s => ['applied','rejected'].includes(s.status));
   container.innerHTML = '';
-  if (pending.length > 0) {
+  if (active.length > 0) {
     const lbl = document.createElement('div');
     lbl.className = 'sq-section-title';
-    lbl.textContent = 'Waiting for approval · ' + pending.length;
+    lbl.textContent = 'In review · ' + active.length;
     container.appendChild(lbl);
-    pending.forEach(s => container.appendChild(buildSuggestionCard(s)));
+    active.forEach(s => container.appendChild(buildSuggestionCard(s)));
   }
   if (decided.length > 0) {
     const lbl = document.createElement('div');
     lbl.className = 'sq-section-title';
-    lbl.style.marginTop = pending.length ? '30px' : '0';
+    lbl.style.marginTop = active.length ? '30px' : '0';
     lbl.textContent = 'Decided';
     container.appendChild(lbl);
     decided.forEach(s => container.appendChild(buildSuggestionCard(s)));
@@ -1181,28 +1206,91 @@ function renderSuggestions() {
 function buildSuggestionCard(s) {
   const div = document.createElement('div');
   div.className = 'sq-item ' + s.status;
+  const liveItin = getLiveItinerary();
   const dayLabel = s.day === 'general'
     ? 'General'
-    : (() => { const d = ITINERARY.find(d => String(d.num) === String(s.day)); return d ? 'Day ' + d.num + ' — ' + d.title : 'Day ' + s.day; })();
-  const statusIcon = s.status === 'pending' ? '⏳ Pending' : s.status === 'approved' ? '✓ Approved' : '✕ Rejected';
+    : (() => { const d = liveItin.find(d => String(d.num) === String(s.day)); return d ? 'Day ' + d.num + ' — ' + d.title : 'Day ' + s.day; })();
+
+  const statusLabels = { pending: '⏳ Pending', generating: '✦ Drafting edit…', proposed: '✦ Edit ready', applied: '✓ Applied', rejected: '✕ Rejected' };
+
+  let actionsHtml = '';
+
+  if (s.status === 'pending') {
+    const dayPickHtml = s.day === 'general'
+      ? `<select class="sq-day-pick" id="pick-${s.id}">
+          ${liveItin.map(d => `<option value="${d.num}">Day ${d.num} — ${d.title}</option>`).join('')}
+         </select>`
+      : '';
+    actionsHtml = `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">
+        ${dayPickHtml}
+        <button class="sq-approve" onclick="getAIEdit('${s.id}')">Get AI edit →</button>
+        <button class="sq-reject" onclick="showRejectBox('${s.id}')">Reject</button>
+        <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
+      </div>
+      <div id="reject-box-${s.id}" style="display:none;width:100%;margin-top:10px">
+        <input class="sq-note-input" id="rnote-${s.id}" placeholder="Reason for rejecting (optional)…">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="sq-approve" style="background:var(--vermillion)" onclick="rejectWithNote('${s.id}')">Confirm reject</button>
+        </div>
+      </div>`;
+  } else if (s.status === 'generating') {
+    actionsHtml = `<span class="sq-generating">Claude is drafting an edit…</span>`;
+  } else if (s.status === 'proposed') {
+    const changes = s.proposedChanges || {};
+    const dayNum = s.day === 'general' ? null : parseInt(s.day);
+    const currentDay = dayNum ? (liveItin.find(d => d.num === dayNum) || {}) : {};
+    let diffHtml = '<div class="sq-diff">';
+    if (changes.title && changes.title !== currentDay.title) {
+      diffHtml += `<div class="diff-field"><div class="diff-label">Title</div><div class="diff-old">${escHtml(currentDay.title||'')}</div><div class="diff-new">${escHtml(changes.title)}</div></div>`;
+    }
+    if (changes.loc && changes.loc !== currentDay.loc) {
+      diffHtml += `<div class="diff-field"><div class="diff-label">Location</div><div class="diff-old">${escHtml(currentDay.loc||'')}</div><div class="diff-new">${escHtml(changes.loc)}</div></div>`;
+    }
+    if (changes.body) {
+      diffHtml += `<div class="diff-field"><div class="diff-label">Description</div><div class="diff-old">${escHtml(currentDay.body||'')}</div><div class="diff-new">${escHtml(changes.body)}</div></div>`;
+    }
+    if (changes.tags) {
+      diffHtml += `<div class="diff-field"><div class="diff-label">Tags</div>
+        <div class="diff-tags">${(currentDay.tags||[]).map(t=>`<span class="day-tag" style="opacity:.5;text-decoration:line-through">${escHtml(t)}</span>`).join('')}</div>
+        <div class="diff-tags" style="margin-top:4px">${changes.tags.map(t=>`<span class="day-tag" style="border-color:var(--indigo)">${escHtml(t)}</span>`).join('')}</div>
+      </div>`;
+    }
+    diffHtml += '</div>';
+    actionsHtml = `
+      ${diffHtml}
+      <input class="sq-note-input" id="anote-${s.id}" placeholder="Add a note for ${escHtml(s.from)} (optional)…">
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+        <button class="sq-approve" onclick="applyEdit('${s.id}')">Apply to itinerary</button>
+        <button class="sq-reject" onclick="showRejectBox('${s.id}')">Reject instead</button>
+        <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
+      </div>
+      <div id="reject-box-${s.id}" style="display:none;width:100%;margin-top:10px">
+        <input class="sq-note-input" id="rnote-${s.id}" placeholder="Reason for rejecting (optional)…">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="sq-approve" style="background:var(--vermillion)" onclick="rejectWithNote('${s.id}')">Confirm reject</button>
+        </div>
+      </div>`;
+  } else {
+    const noteHtml = s.adminNote ? `<div class="sq-admin-note">Note from organiser: ${escHtml(s.adminNote)}</div>` : '';
+    actionsHtml = `${noteHtml}<span class="sq-time">${getTimeAgo(s.createdAt)}</span>`;
+  }
+
   div.innerHTML = `
     <div class="sq-header">
       <span class="sq-from">${escHtml(s.from)}</span>
       <span class="sq-day-badge">${escHtml(dayLabel)}</span>
-      <span class="sq-status-badge ${s.status}">${statusIcon}</span>
+      <span class="sq-status-badge ${s.status}">${statusLabels[s.status]||s.status}</span>
     </div>
     <div class="sq-text">${escHtml(s.text)}</div>
-    <div class="sq-actions">
-      ${s.status === 'pending' ? `
-        <button class="sq-approve" onclick="approveSuggestion('${s.id}')">Approve &amp; add to itinerary</button>
-        <button class="sq-reject" onclick="rejectSuggestion('${s.id}')">Reject</button>
-      ` : s.status === 'rejected' ? `
-        <button class="sq-approve" style="opacity:.7;font-size:11px;padding:6px 12px" onclick="approveSuggestion('${s.id}')">Undo — approve instead</button>
-      ` : ''}
-      <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
-    </div>
+    <div style="margin-top:4px">${actionsHtml}</div>
   `;
   return div;
+}
+
+function showRejectBox(id) {
+  const box = document.getElementById('reject-box-' + id);
+  if (box) { box.style.display = 'block'; box.querySelector('input')?.focus(); }
 }
 
 function getTimeAgo(iso) {
@@ -1214,6 +1302,47 @@ function getTimeAgo(iso) {
   const h = Math.floor(m / 60);
   if (h < 24) return h + 'h ago';
   return Math.floor(h / 24) + 'd ago';
+}
+
+async function getAIEdit(id) {
+  const s = suggestionsData.find(x => x.id === id);
+  if (!s) return;
+  let dayNum = s.day === 'general'
+    ? parseInt(document.getElementById('pick-' + id)?.value)
+    : parseInt(s.day);
+  const liveItin = getLiveItinerary();
+  const day = liveItin.find(d => d.num === dayNum);
+  if (!day) return;
+
+  await db.from('suggestions').update({ status: 'generating', day: String(dayNum) }).eq('id', id);
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-suggest-edit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ suggestion: s.text, day })
+    });
+    const proposed = await res.json();
+    await db.from('suggestions').update({ status: 'proposed', proposed_changes: proposed }).eq('id', id);
+  } catch(e) {
+    await db.from('suggestions').update({ status: 'pending' }).eq('id', id);
+  }
+}
+
+async function applyEdit(id) {
+  const s = suggestionsData.find(x => x.id === id);
+  if (!s || !s.proposedChanges) return;
+  const note = document.getElementById('anote-' + id)?.value.trim() || null;
+  const dayNum = parseInt(s.day);
+  const overrides = load('itinerary', {});
+  overrides[String(dayNum)] = { ...(overrides[String(dayNum)] || {}), ...s.proposedChanges };
+  await save('itinerary', overrides);
+  await db.from('suggestions').update({ status: 'applied', admin_note: note, decided_at: new Date().toISOString() }).eq('id', id);
+}
+
+async function rejectWithNote(id) {
+  const note = document.getElementById('rnote-' + id)?.value.trim() || null;
+  await db.from('suggestions').update({ status: 'rejected', admin_note: note, decided_at: new Date().toISOString() }).eq('id', id);
 }
 
 async function submitSuggestion() {
