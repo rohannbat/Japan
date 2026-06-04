@@ -721,10 +721,20 @@ footer {
 .no-suggestions{font-size:14px;color:var(--ink-soft);font-style:italic;font-family:'Fraunces',serif;padding:16px 0;line-height:1.7}
 .new-suggestion-banner{background:var(--bg-soft);border:0.5px solid var(--indigo);border-left:3px solid var(--indigo);border-radius:4px;padding:13px 16px;margin-bottom:24px;font-size:14px;color:var(--ink-mid);line-height:1.55}
 .new-suggestion-banner strong{color:var(--ink)}
-.day-approved-changes{margin-top:16px;padding:11px 14px;background:rgba(27,58,92,.06);border-left:2.5px solid var(--indigo);border-radius:0 4px 4px 0;font-size:13px;color:var(--ink-mid);line-height:1.65}
-.dac-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
-.dac-item{margin-bottom:5px}
-.dac-item:last-child{margin-bottom:0}
+/* AUTH WIDGET */
+.auth-widget{position:fixed;top:18px;right:24px;z-index:100;display:flex;align-items:center;gap:10px}
+.auth-btn{padding:7px 16px;border-radius:4px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:opacity .15s;border:0.5px solid var(--line);background:var(--bg-card);color:var(--ink)}
+.auth-btn:hover{opacity:.75}
+.auth-name{font-size:12px;color:var(--ink-mid);letter-spacing:.04em}
+/* LOGS */
+.log-item{background:var(--bg-card);border:0.5px solid var(--line);border-radius:6px;padding:16px 20px;margin-bottom:10px}
+.log-header{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.log-day{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--indigo)}
+.log-who{font-size:13px;color:var(--ink-mid)}
+.log-time{font-size:11px;color:var(--ink-soft);margin-left:auto}
+.log-suggestion{font-size:13px;color:var(--ink-mid);font-style:italic;margin-bottom:10px;line-height:1.5}
+.log-revert{padding:5px 12px;background:transparent;color:var(--vermillion);border:0.5px solid var(--vermillion);border-radius:4px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:opacity .15s}
+.log-revert:hover{opacity:.7}
 
 /* ANIMATIONS */
 @keyframes fadeUp {
@@ -763,6 +773,8 @@ header.hero .countdown-block { animation-delay: 0.5s; }
 </style>
 </head>
 <body>
+
+<div class="auth-widget" id="auth-widget"></div>
 
 <main>
 
@@ -894,6 +906,17 @@ header.hero .countdown-block { animation-delay: 0.5s; }
   <div id="suggestion-queue"></div>
 </section>
 
+<section id="logs-section" style="display:none">
+  <div class="section-head">
+    <div>
+      <div class="section-number">vi.</div>
+      <h2 class="section-title">Change log</h2>
+    </div>
+    <div class="section-meta">Admin only</div>
+  </div>
+  <div id="logs-list"></div>
+</section>
+
 <footer>
   <div class="footer-mark">日 本</div>
   <div class="footer-text">January MMXXVII</div>
@@ -907,6 +930,32 @@ header.hero .countdown-block { animation-delay: 0.5s; }
 const SUPABASE_URL = 'https://zmlqeanncywtqpcckvqq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_aH202n0rv2rHa9vHLfwDlw_iK4qFawp';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ---- AUTH ----
+const ADMIN_EMAIL = 'youvereachedrohan@gmail.com';
+let currentUser = null;
+function isAdmin() { return currentUser?.email === ADMIN_EMAIL; }
+
+function renderAuthUI() {
+  const w = document.getElementById('auth-widget');
+  if (!w) return;
+  if (currentUser) {
+    w.innerHTML = `<span class="auth-name">${escHtml(currentUser.email)}</span><button class="auth-btn" onclick="signOut()">Sign out</button>`;
+  } else {
+    w.innerHTML = `<button class="auth-btn" onclick="signIn()">Admin login</button>`;
+  }
+}
+
+async function signIn() {
+  await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: 'https://rohannbat.github.io/Japan/' }
+  });
+}
+
+async function signOut() {
+  await db.auth.signOut();
+}
 
 // ---- IN-MEMORY CACHE (replaces localStorage) ----
 let _state = { checklist: {}, budget: {}, notes: '', 'itin-open': null };
@@ -1068,20 +1117,6 @@ function renderItinerary() {
   container.innerHTML = '';
   const liveItin = getLiveItinerary();
   liveItin.forEach((day, i) => {
-    const appliedForDay = suggestionsData.filter(s => s.status === 'applied' && String(s.day) === String(day.num));
-    const approvedHtml = appliedForDay.length > 0 ? `
-      <div class="day-approved-changes">
-        <div class="dac-label">Edited · ${appliedForDay.length} change${appliedForDay.length>1?'s':''}</div>
-        ${appliedForDay.map(s => {
-          const changes = s.proposedChanges || {};
-          let summary = [];
-          if (changes.body) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Description</span><br>${escHtml(changes.body)}</div>`);
-          if (changes.title) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Title</span><br>${escHtml(changes.title)}</div>`);
-          if (changes.loc) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Location</span><br>${escHtml(changes.loc)}</div>`);
-          if (changes.tags) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Tags</span><br>${changes.tags.map(t=>`<span class="day-tag" style="display:inline-block;margin:2px">${escHtml(t)}</span>`).join('')}</div>`);
-          return summary.length ? summary.join('') : `<div class="dac-item"><em style="color:var(--ink-soft)">${escHtml(s.from)}: ${escHtml(s.text)}</em></div>`;
-        }).join('')}
-      </div>` : '';
     const div = document.createElement('div');
     div.className = 'day' + (opened[i] ? ' open' : '');
     div.innerHTML = `
@@ -1093,7 +1128,7 @@ function renderItinerary() {
         </div>
         <div class="day-divider"></div>
         <div class="day-info">
-          <div class="day-title">${day.title}${appliedForDay.length ? ' <span style="font-size:11px;font-family:Manrope,sans-serif;font-weight:600;color:var(--indigo);letter-spacing:.05em;vertical-align:middle">· edited</span>' : ''}</div>
+          <div class="day-title">${day.title}</div>
           <div class="day-loc">${day.loc}</div>
         </div>
         <div class="day-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
@@ -1102,7 +1137,6 @@ function renderItinerary() {
         <div class="day-content">
           <div class="day-narrative">${day.body}</div>
           <div class="day-tags">${day.tags.map(t => `<span class="day-tag">${t}</span>`).join('')}</div>
-          ${approvedHtml}
         </div>
       </div>
     `;
@@ -1223,26 +1257,30 @@ function buildSuggestionCard(s) {
   let actionsHtml = '';
 
   if (s.status === 'pending') {
-    const dayPickHtml = s.day === 'general'
-      ? `<select class="sq-day-pick" id="pick-${s.id}">
-          ${liveItin.map(d => `<option value="${d.num}">Day ${d.num} — ${d.title}</option>`).join('')}
-         </select>`
-      : '';
     const errorHtml = s._error ? `<div style="font-size:12px;color:var(--vermillion);margin-top:8px;word-break:break-all">Error: ${escHtml(s._error)}</div>` : '';
-    actionsHtml = `
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">
-        ${dayPickHtml}
-        <button class="sq-approve" onclick="getAIEdit('${s.id}')">Get AI edit →</button>
-        <button class="sq-reject" onclick="showRejectBox('${s.id}')">Reject</button>
-        <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
-      </div>
-      ${errorHtml}
-      <div id="reject-box-${s.id}" style="display:none;width:100%;margin-top:10px">
-        <input class="sq-note-input" id="rnote-${s.id}" placeholder="Reason for rejecting (optional)…">
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="sq-approve" style="background:var(--vermillion)" onclick="rejectWithNote('${s.id}')">Confirm reject</button>
+    if (isAdmin()) {
+      const dayPickHtml = s.day === 'general'
+        ? `<select class="sq-day-pick" id="pick-${s.id}">
+            ${liveItin.map(d => `<option value="${d.num}">Day ${d.num} — ${d.title}</option>`).join('')}
+           </select>`
+        : '';
+      actionsHtml = `
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">
+          ${dayPickHtml}
+          <button class="sq-approve" onclick="getAIEdit('${s.id}')">Get AI edit →</button>
+          <button class="sq-reject" onclick="showRejectBox('${s.id}')">Reject</button>
+          <span class="sq-time">${getTimeAgo(s.createdAt)}</span>
         </div>
-      </div>`;
+        ${errorHtml}
+        <div id="reject-box-${s.id}" style="display:none;width:100%;margin-top:10px">
+          <input class="sq-note-input" id="rnote-${s.id}" placeholder="Reason for rejecting (optional)…">
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="sq-approve" style="background:var(--vermillion)" onclick="rejectWithNote('${s.id}')">Confirm reject</button>
+          </div>
+        </div>`;
+    } else {
+      actionsHtml = `<span class="sq-time">${getTimeAgo(s.createdAt)}</span>`;
+    }
   } else if (s.status === 'generating') {
     actionsHtml = `
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -1270,8 +1308,7 @@ function buildSuggestionCard(s) {
       </div>`;
     }
     diffHtml += '</div>';
-    actionsHtml = `
-      ${diffHtml}
+    actionsHtml = diffHtml + (isAdmin() ? `
       <input class="sq-note-input" id="anote-${s.id}" placeholder="Add a note for ${escHtml(s.from)} (optional)…">
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
         <button class="sq-approve" onclick="applyEdit('${s.id}')">Apply to itinerary</button>
@@ -1283,7 +1320,7 @@ function buildSuggestionCard(s) {
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="sq-approve" style="background:var(--vermillion)" onclick="rejectWithNote('${s.id}')">Confirm reject</button>
         </div>
-      </div>`;
+      </div>` : `<span class="sq-time">${getTimeAgo(s.createdAt)}</span>`);
   } else {
     const noteHtml = s.adminNote ? `<div class="sq-admin-note">Note from organiser: ${escHtml(s.adminNote)}</div>` : '';
     actionsHtml = `${noteHtml}<span class="sq-time">${getTimeAgo(s.createdAt)}</span>`;
@@ -1365,8 +1402,11 @@ async function applyEdit(id) {
   const note = document.getElementById('anote-' + id)?.value.trim() || null;
   const dayNum = parseInt(s.day);
   const overrides = load('itinerary', {});
-  overrides[String(dayNum)] = { ...(overrides[String(dayNum)] || {}), ...s.proposedChanges };
+  const previousState = overrides[String(dayNum)] || null;
+  const newState = { ...(overrides[String(dayNum)] || {}), ...s.proposedChanges };
+  overrides[String(dayNum)] = newState;
   await save('itinerary', overrides);
+  await logChange(dayNum, s.from, s.text, previousState, newState);
   const idx = suggestionsData.findIndex(x => x.id === id);
   if (idx !== -1) { suggestionsData[idx] = { ...suggestionsData[idx], status: 'applied', adminNote: note }; renderSuggestions(); renderItinerary(); }
   await db.from('suggestions').update({ status: 'applied', admin_note: note, decided_at: new Date().toISOString() }).eq('id', id);
@@ -1441,10 +1481,75 @@ async function checkUrlForSuggestions() {
   } catch(e) {}
 }
 
+// ---- LOGS ----
+async function logChange(dayNum, fromName, suggestionText, previousState, newState) {
+  try {
+    await db.from('itinerary_log').insert({
+      day_num: dayNum,
+      from_name: fromName,
+      suggestion_text: suggestionText,
+      previous_state: previousState,
+      new_state: newState,
+      created_at: new Date().toISOString()
+    });
+  } catch(e) { console.error('Log write failed:', e); }
+}
+
+async function renderLogs() {
+  const section = document.getElementById('logs-section');
+  const list = document.getElementById('logs-list');
+  if (!section || !list) return;
+  if (!isAdmin()) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  const { data } = await db.from('itinerary_log').select('*').order('created_at', { ascending: false });
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p style="font-size:14px;color:var(--ink-soft);font-style:italic;font-family:Fraunces,serif">No changes applied yet.</p>';
+    return;
+  }
+  list.innerHTML = '';
+  data.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'log-item';
+    div.innerHTML = `
+      <div class="log-header">
+        <span class="log-day">Day ${entry.day_num}</span>
+        <span class="log-who">${escHtml(entry.from_name || '')}</span>
+        <span class="log-time">${getTimeAgo(entry.created_at)}</span>
+      </div>
+      <div class="log-suggestion">"${escHtml(entry.suggestion_text || '')}"</div>
+      <button class="log-revert" onclick="revertLog(${JSON.stringify(entry).replace(/</g,'\\u003c')})">↩ Revert this change</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+async function revertLog(entry) {
+  if (!confirm('Revert Day ' + entry.day_num + ' to its state before this change?')) return;
+  const overrides = load('itinerary', {});
+  if (entry.previous_state) {
+    overrides[String(entry.day_num)] = entry.previous_state;
+  } else {
+    delete overrides[String(entry.day_num)];
+  }
+  await save('itinerary', overrides);
+  await db.from('itinerary_log').delete().eq('id', entry.id);
+  renderItinerary();
+  renderLogs();
+}
+
 updateCountdown();
 setInterval(updateCountdown, 60000);
 
 async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  currentUser = session?.user || null;
+  renderAuthUI();
+  db.auth.onAuthStateChange((_event, sess) => {
+    currentUser = sess?.user || null;
+    renderAuthUI();
+    renderSuggestions();
+    renderLogs();
+  });
   await loadAllState();
   renderChecklist();
   populateDaySelect();
@@ -1454,6 +1559,7 @@ async function init() {
   setupNotes();
   await checkUrlForSuggestions();
   subscribeToChanges();
+  renderLogs();
 }
 init();
 </script>
