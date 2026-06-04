@@ -1072,7 +1072,15 @@ function renderItinerary() {
     const approvedHtml = appliedForDay.length > 0 ? `
       <div class="day-approved-changes">
         <div class="dac-label">Edited · ${appliedForDay.length} change${appliedForDay.length>1?'s':''}</div>
-        ${appliedForDay.map(s => `<div class="dac-item"><strong style="color:var(--ink)">${escHtml(s.from)}:</strong> ${escHtml(s.text)}</div>`).join('')}
+        ${appliedForDay.map(s => {
+          const changes = s.proposedChanges || {};
+          let summary = [];
+          if (changes.body) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Description</span><br>${escHtml(changes.body)}</div>`);
+          if (changes.title) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Title</span><br>${escHtml(changes.title)}</div>`);
+          if (changes.loc) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Location</span><br>${escHtml(changes.loc)}</div>`);
+          if (changes.tags) summary.push(`<div class="dac-item"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo)">Tags</span><br>${changes.tags.map(t=>`<span class="day-tag" style="display:inline-block;margin:2px">${escHtml(t)}</span>`).join('')}</div>`);
+          return summary.length ? summary.join('') : `<div class="dac-item"><em style="color:var(--ink-soft)">${escHtml(s.from)}: ${escHtml(s.text)}</em></div>`;
+        }).join('')}
       </div>` : '';
     const div = document.createElement('div');
     div.className = 'day' + (opened[i] ? ' open' : '');
