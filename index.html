@@ -929,7 +929,15 @@ async function loadAllState() {
   const { data: rows } = await db.from('trip_state').select('*');
   if (rows) rows.forEach(r => { _state[r.key] = r.value; });
   const { data: sRows } = await db.from('suggestions').select('*').order('created_at', { ascending: true });
-  if (sRows) suggestionsData = sRows.map(dbToSuggestion);
+  if (sRows) {
+    suggestionsData = sRows.map(dbToSuggestion);
+    // Reset any suggestions stuck in 'generating' from a previous failed attempt
+    const stuck = suggestionsData.filter(s => s.status === 'generating');
+    if (stuck.length > 0) {
+      stuck.forEach(s => { s.status = 'pending'; });
+      await Promise.all(stuck.map(s => db.from('suggestions').update({ status: 'pending' }).eq('id', s.id)));
+    }
+  }
 }
 
 function dbToSuggestion(r) {
@@ -1228,7 +1236,11 @@ function buildSuggestionCard(s) {
         </div>
       </div>`;
   } else if (s.status === 'generating') {
-    actionsHtml = `<span class="sq-generating">Claude is drafting an edit…</span>`;
+    actionsHtml = `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="sq-generating">Claude is drafting an edit…</span>
+        <button class="sq-reject" onclick="resetToPending('${s.id}')">Reset</button>
+      </div>`;
   } else if (s.status === 'proposed') {
     const changes = s.proposedChanges || {};
     const dayNum = s.day === 'general' ? null : parseInt(s.day);
@@ -1279,6 +1291,12 @@ function buildSuggestionCard(s) {
     <div style="margin-top:4px">${actionsHtml}</div>
   `;
   return div;
+}
+
+async function resetToPending(id) {
+  const idx = suggestionsData.findIndex(x => x.id === id);
+  if (idx !== -1) { suggestionsData[idx] = { ...suggestionsData[idx], status: 'pending', _error: null }; renderSuggestions(); }
+  await db.from('suggestions').update({ status: 'pending' }).eq('id', id);
 }
 
 function showRejectBox(id) {
